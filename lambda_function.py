@@ -11,9 +11,9 @@ def lambda_handler(event, context):
     api_key = "AIzaSyBOxR6evmLJIYBK7QIa5u8uvch01EDx5XA"
     # Build the YouTube API client
     youtube = build('youtube', 'v3', developerKey=api_key)
-    # event_data = json.loads(event['body'])
-    # url = event_data["YouTubeURL"]
-    url="https://www.youtube.com/watch?v=rnPsW5BC1xI"
+    event_data = json.loads(event['body'])
+    url = event_data["YouTubeURL"]
+    #url="https://www.youtube.com/watch?v=rnPsW5BC1xI"
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
     param_value = query_params.get('v', None)
