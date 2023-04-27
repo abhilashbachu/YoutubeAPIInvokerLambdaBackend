@@ -1,3 +1,4 @@
+
 import json
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -19,6 +20,10 @@ def lambda_handler(event, context):
     param_value = query_params.get('v', None)
     api_key = "AIzaSyBOxR6evmLJIYBK7QIa5u8uvch01EDx5XA"
     res=liveStreamOrNot(youtube,param_value[0],api_key)
+    BUCKET_NAME = "youtubebucketdownload"
+    s3 = boto3.resource('s3')
+    obj = s3.Object(BUCKET_NAME, 'YoutubeOutput.csv')
+    obj.put(Body=json.dumps(res))
     idt=1;
     for ind in res:
         sendToKinesis(ind,idt)
@@ -52,7 +57,10 @@ def liveChatObjects(youtube,live_chat_id,api_key):
         val=val+1
         #.append(response)
         for item in response['items']:
-            res.append(item)
+            newitem={}
+            newitem["id"]=item["id"]
+            newitem["message"]=item["snippet"]["displayMessage"]
+            res.append(newitem)
         break
     return res
     
@@ -81,10 +89,15 @@ def video_commentsby_id(video_id):
 	    videoId=video_id
 	    ).execute()
 	outloop =1
+	#replies=[]
 	# iterate video response
 	while video_response:
 		for item in video_response['items']:
-			replies.append(item)
+		    #replies.append(item)
+		    newitem={}
+		    newitem["id"]=item["id"]
+		    newitem["message"]=item["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
+		    replies.append(newitem)
 		if 'nextPageToken' in video_response:
 			print("iam here token thing")
 			next_page_token = video_response['nextPageToken']
